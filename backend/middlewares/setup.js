@@ -1,7 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
-const requestLogger = require("../middleware/requestLogger");
+const rateLimit = require('express-rate-limit');
+const requestLogger = require("./requestLogger");
 const config = require("../config/config");
 
 const setupMiddleware = (app) => {
@@ -37,4 +38,17 @@ const setupMiddleware = (app) => {
   });
 };
 
-module.exports = { setupMiddleware };
+const createAuthLimiter = () => {
+  return rateLimit({
+    windowMs: config.RATE_LIMIT.WINDOW_MS,
+    max: config.RATE_LIMIT.AUTH_MAX_REQUESTS,
+    message: {
+      success: false,
+      message: 'Too many authentication attempts, please try again later.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+};
+
+module.exports = { setupMiddleware, createAuthLimiter};

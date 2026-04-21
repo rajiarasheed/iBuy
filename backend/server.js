@@ -4,7 +4,9 @@ const http= require('http')
 const config= require('./config/config')
 const logger = require('./utils/logger')
 const dbConnection = require('./config/database')
-const { setupMiddleware } = require('./middleware/setup')
+const { setupMiddleware } = require('./middlewares/setup')
+const { errorHandler, notFound } = require('./middlewares/errorHandler')
+const { setupRoutes } = require('./routes')
 
 class Server{
     constructor(){
@@ -12,7 +14,7 @@ class Server{
         this.server=http.createServer(this.app)
         this.port=config.PORT
        
-       setupMiddleware(this.app) 
+       
         // ✅ Test route
         this.app.get('/', (req, res) => {
             res.send('API is running...')
@@ -22,6 +24,13 @@ class Server{
     async initialize(){
         try {
             await dbConnection.connect();
+
+            setupMiddleware(this.app) 
+            setupRoutes(this.app)
+
+            this.app.use(errorHandler);
+            this.app.use(notFound)
+
             logger.info('Server Initialization Successful')
         } catch (error) {
             logger.error('Server initialization failed: ',error);
