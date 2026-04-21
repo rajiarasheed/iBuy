@@ -4,16 +4,15 @@ const http= require('http')
 const config= require('./config/config')
 const logger = require('./utils/logger')
 const dbConnection = require('./config/database')
+const { setupMiddleware } = require('./middleware/setup')
 
 class Server{
     constructor(){
         this.app=express()
         this.server=http.createServer(this.app)
         this.port=config.PORT
-        // ✅ Middleware
-        this.app.use(express.json())
-        this.app.use(express.urlencoded({ extended: true }))
-
+       
+       setupMiddleware(this.app) 
         // ✅ Test route
         this.app.get('/', (req, res) => {
             res.send('API is running...')
