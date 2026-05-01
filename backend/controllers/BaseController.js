@@ -12,9 +12,12 @@ class BaseController {
     // }
     // Correct version in BaseController
 static asyncHandler(fn) {
-    return (req, res, next) => {
-        // We pass next to catch so it reaches the global error handler
-        Promise.resolve(fn(req, res, next)).catch(next); 
+    return function(req, res, next) {
+        try {
+            Promise.resolve(fn(req, res, next)).catch(next);
+        } catch (err) {
+            next(err);  // ← catches synchronous throws like validateRequest
+        }
     };
 }
 

@@ -32,9 +32,15 @@ const setupRoutes = (app) => {
     const authLimiter = createAuthLimiter();
     const shouldUseAuthLimiter = config.NODE_ENV === 'production';
 
-    app.use('/api/auth', shouldUseAuthLimiter ? authLimiter : [], authRoutes);
+    // app.use('/api/auth', shouldUseAuthLimiter ? authLimiter : [], authRoutes);
     // app.use('/api/admin', adminRoutes);
     // app.use('/api/todos', todoRoutes);
+    // ✅ Simply don't pass the limiter at all in dev
+if (shouldUseAuthLimiter) {
+    app.use('/api/auth', authLimiter, authRoutes);
+} else {
+    app.use('/api/auth', authRoutes);
+}
 };
 
 module.exports = {

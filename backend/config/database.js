@@ -77,7 +77,8 @@ const dbConnection = new DatabaseConnection();
 // Stop your Node app manually
 process.on('SIGINT', async()=>{
     await dbConnection.disconnect();
-    process.getMaxListeners(0)
+    // process.getMaxListeners(0)
+    process.exit(0);
 })
 
 module.exports = dbConnection;
