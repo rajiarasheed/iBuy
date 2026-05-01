@@ -1,4 +1,5 @@
 const { AuthService } = require("../services");
+const { registerValidation } = require("../utils/validation");
 const BaseController = require("./BaseController");
 
 class AuthController extends BaseController{

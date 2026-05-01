@@ -29,8 +29,8 @@ class Server {
       setupMiddleware(this.app);
       setupRoutes(this.app);
 
-      this.app.use(errorHandler);
       this.app.use(notFound);
+      this.app.use(errorHandler);
 
       initializeSocket(this.server);
 

@@ -5,11 +5,18 @@ const logger = require('../utils/logger');
 class BaseController {
 
     // Automatically catches errors in async functions
-    static asyncHandler(fn){
-        return (req,res,next)=>{
-            Promise.resolve(fn(req,res,next)).catch(next)
-        }
-    }
+    // static asyncHandler(fn){
+    //     return (req,res,next)=>{
+    //         Promise.resolve(fn(req,res,next)).catch(next)
+    //     }
+    // }
+    // Correct version in BaseController
+static asyncHandler(fn) {
+    return (req, res, next) => {
+        // We pass next to catch so it reaches the global error handler
+        Promise.resolve(fn(req, res, next)).catch(next); 
+    };
+}
 
     // central validation helper
     static validateRequest(schema,data){

@@ -5,14 +5,28 @@ const rateLimit = require('express-rate-limit');
 const requestLogger = require("./requestLogger");
 const config = require("../config/config");
 
+// runs once at server starts
 const setupMiddleware = (app) => {
   app.use(
+    //Adds security headers automatically. The cross-origin policy allows resources (like images) to be loaded across different origins.
     helmet({
       crossOriginResourcePolicy: {
         policy: "cross-origin",
       },
     }),
   );
+
+  const limiter = rateLimit({
+    windowMs: config.RATE_LIMIT.WINDOW_MS,
+    max: config.RATE_LIMIT.MAX_REQUESTS,
+    message: {
+      success: false,
+      message: 'Too many requests from this IP, please try again later.'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use(limiter);
 
   const corsOptions = {
     origin: config.CORS.ORIGIN,
@@ -27,6 +41,8 @@ const setupMiddleware = (app) => {
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
   app.use(requestLogger);
+
+  //A simple endpoint that returns server status — used by monitoring tools or load balancers to check if the server is alive. Returns uptime, timestamp, and environment.
   app.get("/health", (req, res) => {
     res.status(200).json({
       success: true,
@@ -38,6 +54,7 @@ const setupMiddleware = (app) => {
   });
 };
 
+//strict limiter for auth routes
 const createAuthLimiter = () => {
   return rateLimit({
     windowMs: config.RATE_LIMIT.WINDOW_MS,

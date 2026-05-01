@@ -24,8 +24,8 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Email is required"],
-      minlength: [2, "Password must be atleast 8 characters"],
+      required: [true, "Password is required"],
+      minlength: [8, "Password must be atleast 8 characters"],
     },
     role: {
       type: String,
@@ -74,7 +74,7 @@ userSchema.pre('save', async function(next){
         } catch (error) {
             next(error)
         }
-})
+});
 
 userSchema.methods.comparePassword = async function(candidatePassword){
     return await bcrypt.compare(candidatePassword,this.password)
