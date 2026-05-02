@@ -1,8 +1,13 @@
 const { error } = require("winston");
 const User = require("../models/User");
-const { ConflictError, AuthenticationError, NotFoundError } = require("../utils/errors");
+const {
+  ConflictError,
+  AuthenticationError,
+  NotFoundError,
+} = require("../utils/errors");
 const logger = require("../utils/logger");
 const { generateUserToken } = require("../utils/jwt");
+const { generateOtp, getOtpExpiry } = require("../utils/otp");
 
 class AuthService {
   // registration
@@ -12,33 +17,95 @@ class AuthService {
       if (existingUser) {
         throw new ConflictError("User with this email already exists");
       }
-      const user = new User(userData);
+      //   Generate OTP before saving
+      const otp = generateOtp();
+      const otpExpiry = getOtpExpiry();
+
+      const user = new User({ ...userData, otp, otpExpiry });
       await user.save();
 
-      const token = generateUserToken({
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      });
+      //   send oto email
+      await sendOtpEmail(user.email, otp);
+      
 
       logger.info(`New user registered: ${userData.email}`);
-
+      // Don't return token yet — user must verify OTP first
       return {
         user: user.getPublicProfile(),
-        token,
+        message: 'OTP sent to your email. Please verify to continue.',
       };
     } catch (error) {
       logger.error("Registration error:", error);
       throw error;
     }
   }
+
+//   verify otp
+static async verifyOtp({email,otp}){
+    try {
+        const user= await User.findByEmail(email);
+
+        if (!user) throw new AuthenticationError('User not found');
+        if (user.isVerified) throw new ConflictError('User is already verified');
+        if(user.otp || user.otpExpiry) throw new AuthenticationError('No otp found please request one...');
+        if(new Date()>user.otpExpiry) throw new AuthenticationError('Otp has expired');
+        if(user.otp !== otp) throw new AuthenticationError('Invalid otp');
+
+        // Mark verify otp
+        user.isVerified=true;
+        user.otp=undefined;
+        user.otpExpiry=undefined;
+
+        await user.save()
+
+        // Now generate token
+         const token = generateUserToken({
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      });
+
+      logger.info(`User verified: ${email}`);
+
+      return{
+        user:getPublicProfile(),token
+      }
+        
+    } catch (error) {
+        logger.error("OTP verification error:", error);
+      throw error;
+    }
+}
+
+// Reset OTP
+static async resendOtp({email}){
+    try {
+        const user=await findByEmail(email);
+        if(!user) throw new AuthenticationError('User not found.')
+        if(isVerified) throw new ConflictError('User alreadyverified.')
+        
+        const otp=generateOtp();
+        user.otp=otp;
+        user.otpExpiry=getOtpExpiry()
+
+        await user.save()
+        await user.sendOtpEmail(email,otp)
+        logger.info(`Otp resend to : ${email}`)
+        return{
+            message:'New OTP sent to your email'
+        }
+        
+    } catch (error) {
+        logger.error('Otp resend error',error)
+    }
+}
   // for login
   static async login(credential) {
     try {
       const { email, password } = credential;
 
       // find user
-      const user =await User.findByEmail(email);
+      const user = await User.findByEmail(email);
       if (!user) {
         throw new AuthenticationError("Invalid email or password");
       }

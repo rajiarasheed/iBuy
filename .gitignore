@@ -13,3 +13,4 @@ coverage
 .idea
 *.iml   
 backend/logs/
+backend/explatation.txt

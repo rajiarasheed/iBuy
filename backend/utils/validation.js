@@ -36,6 +36,19 @@ const registerValidation = Joi.object({
   })
 });
 
+const verifyOtpValidation = Joi.object({
+  email:commonPatterns.email.messages(customMessages),
+  otp:Joi.string().length(6).pattern(/^\d+$/).required().messages({
+    'string.length':'OTP must be 6 digits',
+    'string.pattern':'Otp must contains numbers only',
+    'any.required':'Otp required'
+  })
+})
+
+const resendOtpValidation = Joi.object({
+  email:commonPatterns.email.messages(customMessages)
+})
+
 const loginValidation = Joi.object({
   email: commonPatterns.email.messages(customMessages),
   password: Joi.string().required().messages(customMessages)
@@ -123,6 +136,8 @@ const updateTodoValidation = Joi.object({
 
 module.exports = {
   registerValidation,
+  verifyOtpValidation,
+  resendOtpValidation,
   loginValidation,
   adminLoginValidation,
   profileUpdateValidation,

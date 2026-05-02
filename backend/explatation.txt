@@ -1,0 +1,14 @@
+#otp validation
+
+Step 1 — Add OTP sending utility
+Create backend/utils/mailer.js:
+Add to .env
+Step 2 — Add OTP helper to utils/otp.js (generateOtp ,getOtpExpiry )
+Step 3 — Update AuthService.js(register,verifyOtp,resendOtp)
+Step 4 — Add to AuthController.js(resendOtp,verifyOtp)
+Step 5 — Add Joi validation in validation.js
+Step 6 — Add routes in routes/auth.js
+
+
+Day 3 ● Frontend: User Login/Signup (Tailwind form + Axios integration) ● JWT token store in localStorage
+
