@@ -22,7 +22,7 @@ const Login = () => {
       try {
         const res=await loginUser(data);
         // save user + token
-        login(res.data)
+        login(res.data.data)
         toast.success("Welcome back!");
         navigate("/");
       } catch (error) {

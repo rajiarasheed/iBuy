@@ -28,7 +28,9 @@ const Register = () => {
         const { confirmPassword, ...payload } = data;
         await registerUser(payload);
         toast.success("Account created! Please Verify OTP.");
-        navigate("/verify-otp");
+        navigate("/verify-otp", {
+          state: { email: data.email },
+        });
       } catch (err) {
         console.log("REGISTER ERROR:", err.response?.data);
         toast.error(err?.response?.data?.message || "Registration failed");
