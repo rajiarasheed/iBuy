@@ -1,5 +1,6 @@
 const { error } = require("winston");
 const User = require("../models/User");
+const {sendOtpEmail} = require("../utils/mailer");
 const {
   ConflictError,
   AuthenticationError,
@@ -13,6 +14,7 @@ class AuthService {
   // registration
   static async register(userData) {
     try {
+      
       const existingUser = await User.findByEmail(userData.email);
       if (existingUser) {
         throw new ConflictError("User with this email already exists");
@@ -22,11 +24,11 @@ class AuthService {
       const otpExpiry = getOtpExpiry();
 
       const user = new User({ ...userData, otp, otpExpiry });
-      await user.save();
+      
 
       //   send oto email
       await sendOtpEmail(user.email, otp);
-      
+      await user.save();
 
       logger.info(`New user registered: ${userData.email}`);
       // Don't return token yet — user must verify OTP first
@@ -47,7 +49,7 @@ static async verifyOtp({email,otp}){
 
         if (!user) throw new AuthenticationError('User not found');
         if (user.isVerified) throw new ConflictError('User is already verified');
-        if(user.otp || user.otpExpiry) throw new AuthenticationError('No otp found please request one...');
+        if(!user.otp || !user.otpExpiry) throw new AuthenticationError('No otp found please request one...');
         if(new Date()>user.otpExpiry) throw new AuthenticationError('Otp has expired');
         if(user.otp !== otp) throw new AuthenticationError('Invalid otp');
 
@@ -68,7 +70,7 @@ static async verifyOtp({email,otp}){
       logger.info(`User verified: ${email}`);
 
       return{
-        user:getPublicProfile(),token
+        user:user.getPublicProfile(),token
       }
         
     } catch (error) {
@@ -80,16 +82,16 @@ static async verifyOtp({email,otp}){
 // Reset OTP
 static async resendOtp({email}){
     try {
-        const user=await findByEmail(email);
+        const user=await User.findByEmail(email);
         if(!user) throw new AuthenticationError('User not found.')
-        if(isVerified) throw new ConflictError('User alreadyverified.')
+        if(user.isVerified) throw new ConflictError('User alreadyverified.')
         
         const otp=generateOtp();
         user.otp=otp;
         user.otpExpiry=getOtpExpiry()
 
         await user.save()
-        await user.sendOtpEmail(email,otp)
+        await user.sendOtpEmail(user.email,otp)
         logger.info(`Otp resend to : ${email}`)
         return{
             message:'New OTP sent to your email'
