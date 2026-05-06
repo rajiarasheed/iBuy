@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { resendOtp, resetPassword } from "../../services/authService";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ const ResetPassword = () => {
   const email = location.state?.email;
 
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -38,7 +41,6 @@ const ResetPassword = () => {
           newPassword: data.password,
           confirmPassword: data.confirmPassword,
         });
-        
 
         toast.success("Password reset successful!");
         navigate("/login");
@@ -92,16 +94,22 @@ const ResetPassword = () => {
             </div>
 
             {/* Password */}
-            <div>
+            <div className="relative">
               <input
                 {...register("password", {
                   required: "Password required",
                   minLength: { value: 8, message: "Min 8 characters" },
                 })}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="New Password"
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#F83758]"
               />
+              <span
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-2.5 cursor-pointer text-gray-500"
+              >
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </span>
               {errors.password && (
                 <p className="text-red-500 text-sm">
                   {errors.password.message}
@@ -110,17 +118,23 @@ const ResetPassword = () => {
             </div>
 
             {/* Confirm Password */}
-            <div>
+            <div className="relative">
               <input
                 {...register("confirmPassword", {
                   required: "Confirm password is required",
                   validate: (value) =>
                     value === password || "Passwords do not match",
                 })}
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm Password"
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#F83758]"
               />
+              <span
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 top-2.5 cursor-pointer text-gray-500"
+              >
+                {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </span>
               {errors.confirmPassword && (
                 <p className="text-red-500 text-sm">
                   {errors.confirmPassword.message}

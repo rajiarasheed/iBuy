@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { verifyOtp } from '../../services/authService'
+import { resendOtp, verifyOtp } from '../../services/authService'
 
 const VerifyOTP = () => {
     const navigate=useNavigate()
@@ -21,6 +21,16 @@ const VerifyOTP = () => {
             document.getElementById(`otp-${index+1}`).focus()
         }
     }
+
+    // resend otp
+    const handleResendOtp = async () => {
+        try {
+          await resendOtp({ email });
+          toast.success("New OTP sent!");
+        } catch (err) {
+          toast.error(err?.response?.data?.message || "Failed to resend OTP");
+        }
+      };
 
     // handleSubmit
     const handleSubmit=useCallback(async()=>{
@@ -61,6 +71,15 @@ const VerifyOTP = () => {
                      className='w-10 h-12 border rounded-lg text-center focus:ring-2 focus:ring-[#F83758] outline-none focus:border-0'
                      />
                 ))}
+            </div>
+
+            <div className="text-right mb-3">
+              <span
+                className="text-sm text-[#F83758] cursor-pointer hover:underline"
+                onClick={handleResendOtp}
+              >
+                Resend otp
+              </span>
             </div>
 
             {/* button */}

@@ -6,11 +6,13 @@ import { toast } from "react-toastify";
 import { motion } from "framer-motion"; // framer-motion- animation
 import logo from "../../assets/ibuy-logo-white.svg"; // logo
 import { useAuth } from "../../context/authContext";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -95,14 +97,20 @@ const Login = () => {
                 </p>
               )}
             </div>
-            <div>
+            <div className="relative">
               <input
                 {...register("password", { required: "Password is required" })}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 autoComplete="current-password"
                 className="w-full px-4 py-2 border border-gray-300 outline-none rounded-lg focus:ring-2 focus:ring-[#F83758]"
               />
+              <span
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-2.5 cursor-pointer text-gray-500"
+              >
+                {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+              </span>
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.password.message}
