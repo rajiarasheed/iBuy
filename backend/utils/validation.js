@@ -49,6 +49,27 @@ const resendOtpValidation = Joi.object({
   email:commonPatterns.email.messages(customMessages)
 })
 
+const forgotPasswordValidation = Joi.object({
+  email:commonPatterns.email.messages(customMessages)
+})
+
+const resetPasswordValidation=Joi.object({
+  email:commonPatterns.email.messages(customMessages),
+  otp:Joi.string().length(6).pattern(/^\d+$/).required().messages({
+    'string.length':'OTP must be 6 digits',
+    'string.pattern':'Otp must contains numbers only',
+    'any.required':'Otp required'
+  }),
+  newPassword: commonPatterns.password.messages({
+    ...customMessages,
+    'string.min': 'New password must be at least 8 characters long'
+  }),
+  confirmPassword: Joi.string().valid(Joi.ref('newPassword')).required().messages({
+    'any.only': 'Password confirmation does not match new password',
+    'any.required': 'Password confirmation is required'
+  })
+})
+
 const loginValidation = Joi.object({
   email: commonPatterns.email.messages(customMessages),
   password: Joi.string().required().messages(customMessages)
@@ -138,6 +159,8 @@ module.exports = {
   registerValidation,
   verifyOtpValidation,
   resendOtpValidation,
+  resetPasswordValidation,
+  forgotPasswordValidation,
   loginValidation,
   adminLoginValidation,
   profileUpdateValidation,

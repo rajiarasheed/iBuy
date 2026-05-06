@@ -1,6 +1,6 @@
 const { error } = require("winston");
 const User = require("../models/User");
-const {sendOtpEmail} = require("../utils/mailer");
+const { sendOtpEmail } = require("../utils/mailer");
 const {
   ConflictError,
   AuthenticationError,
@@ -14,7 +14,6 @@ class AuthService {
   // registration
   static async register(userData) {
     try {
-      
       const existingUser = await User.findByEmail(userData.email);
       if (existingUser) {
         throw new ConflictError("User with this email already exists");
@@ -24,7 +23,6 @@ class AuthService {
       const otpExpiry = getOtpExpiry();
 
       const user = new User({ ...userData, otp, otpExpiry });
-      
 
       //   send oto email
       await sendOtpEmail(user.email, otp);
@@ -34,7 +32,7 @@ class AuthService {
       // Don't return token yet — user must verify OTP first
       return {
         user: user.getPublicProfile(),
-        message: 'OTP sent to your email. Please verify to continue.',
+        message: "OTP sent to your email. Please verify to continue.",
       };
     } catch (error) {
       logger.error("Registration error:", error);
@@ -42,26 +40,28 @@ class AuthService {
     }
   }
 
-//   verify otp
-static async verifyOtp({email,otp}){
+  //   verify otp
+  static async verifyOtp({ email, otp }) {
     try {
-        const user= await User.findByEmail(email);
+      const user = await User.findByEmail(email);
 
-        if (!user) throw new AuthenticationError('User not found');
-        if (user.isVerified) throw new ConflictError('User is already verified');
-        if(!user.otp || !user.otpExpiry) throw new AuthenticationError('No otp found please request one...');
-        if(new Date()>user.otpExpiry) throw new AuthenticationError('Otp has expired');
-        if(user.otp !== otp) throw new AuthenticationError('Invalid otp');
+      if (!user) throw new AuthenticationError("User not found");
+      if (user.isVerified) throw new ConflictError("User is already verified");
+      if (!user.otp || !user.otpExpiry)
+        throw new AuthenticationError("No otp found please request one...");
+      if (new Date() > user.otpExpiry)
+        throw new AuthenticationError("Otp has expired");
+      if (user.otp !== otp) throw new AuthenticationError("Invalid otp");
 
-        // Mark verify otp
-        user.isVerified=true;
-        user.otp=undefined;
-        user.otpExpiry=undefined;
+      // Mark verify otp
+      user.isVerified = true;
+      user.otp = undefined;
+      user.otpExpiry = undefined;
 
-        await user.save()
+      await user.save();
 
-        // Now generate token
-         const token = generateUserToken({
+      // Now generate token
+      const token = generateUserToken({
         id: user._id,
         email: user.email,
         role: user.role,
@@ -69,38 +69,99 @@ static async verifyOtp({email,otp}){
 
       logger.info(`User verified: ${email}`);
 
-      return{
-        user:user.getPublicProfile(),token
-      }
-        
+      return {
+        user: user.getPublicProfile(),
+        token,
+      };
     } catch (error) {
-        logger.error("OTP verification error:", error);
+      logger.error("OTP verification error:", error);
       throw error;
     }
-}
+  }
 
-// Reset OTP
-static async resendOtp({email}){
+  // Resend OTP
+  static async resendOtp({ email }) {
     try {
-        const user=await User.findByEmail(email);
-        if(!user) throw new AuthenticationError('User not found.')
-        if(user.isVerified) throw new ConflictError('User alreadyverified.')
-        
-        const otp=generateOtp();
-        user.otp=otp;
-        user.otpExpiry=getOtpExpiry()
+      const user = await User.findByEmail(email);
+      if (!user) throw new AuthenticationError("User not found.");
+      // if (user.isVerified) throw new ConflictError("User alreadyverified.");
 
-        await user.save()
-        await user.sendOtpEmail(user.email,otp)
-        logger.info(`Otp resend to : ${email}`)
-        return{
-            message:'New OTP sent to your email'
-        }
-        
+      const otp = generateOtp();
+      user.otp = otp;
+      user.otpExpiry = getOtpExpiry();
+
+      await user.save();
+      await sendOtpEmail(user.email, otp);
+      logger.info(`Otp resend to : ${email}`);
+      return {
+        message: "New OTP sent to your email",
+      };
     } catch (error) {
-        logger.error('Otp resend error',error)
+      logger.error("Otp resend error", error);
+      throw error
     }
-}
+  }
+
+  // forgot password
+  static async forgotPassword({ email }) {
+    try {
+      const user = await User.findByEmail(email);
+      if (!user) {
+        throw new NotFoundError("User not found");
+      }
+
+      if (user.status === "banned") {
+        throw new AuthenticationError("Account is banned");
+      }
+
+      // generate otp
+      const otp = generateOtp();
+      user.otp = otp;
+      user.otpExpiry = getOtpExpiry();
+
+      await user.save();
+      await sendOtpEmail(user.email, otp);
+      logger.info(`Password reset OTP sent : ${email}`);
+      return {
+        message: "New OTP sent to your email for password reset",
+        email: user.email,
+      };
+    } catch (error) {
+      logger.error("Forgot password error", error);
+      throw error;
+    }
+  }
+
+  // reset password (verify otp+update pass)
+  static async resetPassword({ email, otp, newPassword }) {
+    try {
+      const user = await User.findByEmail(email);
+
+      if (!user) throw new NotFoundError("User not found");
+      if (!user.otp || !user.otpExpiry)
+        throw new AuthenticationError("No otp found please request one...");
+      if (new Date() > user.otpExpiry)
+        throw new AuthenticationError("Otp has expired");
+      if (user.otp !== otp) throw new AuthenticationError("Invalid otp");
+      
+
+      // update password
+      user.password=newPassword;
+
+      // clear otp
+      user.otp=undefined
+      user.otpExpiry=undefined
+
+      await user.save();
+      logger.info(`Password reset successfull : ${email}`)
+      return {
+        message: "Password reset successfull",
+      };
+    } catch (error) {
+      logger.error("Reset password error", error);
+      throw error;
+    }
+  }
   // for login
   static async login(credential) {
     try {

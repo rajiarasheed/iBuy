@@ -7,6 +7,8 @@ import { AuthProvider } from "./context/authContext";
 import {BrowserRouter,Routes,Route} from "react-router-dom"
 import ProtectedRoute from "./components/ProtectedRoute";
 import "react-toastify/dist/ReactToastify.css";
+import ForgotPassword from "./pages/user/ForgotPassword";
+import ResetPassword from "./pages/user/ResetPassword";
 
 const App = () => {
   return (
@@ -16,6 +18,8 @@ const App = () => {
           <Route path="/login" element={<Login/>}></Route>
           <Route path="/register" element={<Register/>}></Route>
           <Route path="/verify-otp" element={<VerifyOTP/>}></Route>
+          <Route path="/forgot-password" element={<ForgotPassword />}></Route>
+          <Route path="/reset-password" element={<ResetPassword />}></Route>
           <Route path='/' element={<ProtectedRoute><Home /></ProtectedRoute>}></Route>
         </Routes>
       </BrowserRouter>

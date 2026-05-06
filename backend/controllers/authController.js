@@ -1,5 +1,5 @@
 const { AuthService } = require("../services");
-const { registerValidation, loginValidation, verifyOtpValidation, resendOtpValidation } = require("../utils/validation");
+const { registerValidation, loginValidation, verifyOtpValidation, resendOtpValidation, forgotPasswordValidation, resetPasswordValidation } = require("../utils/validation");
 const BaseController = require("./BaseController");
 
 class AuthController extends BaseController {
@@ -20,7 +20,19 @@ class AuthController extends BaseController {
     static resendOtp=BaseController.asyncHandler(async(req,res,next)=>{
         const validateData=BaseController.validateRequest(resendOtpValidation,req.body);
         const result = await AuthService.resendOtp(validateData)
-        BaseController.sendSuccess(res,result.message, result, 200)
+        BaseController.sendSuccess(res,result?.message || "OTP sent", result, 200)
+    })
+    static forgotPassword =BaseController.asyncHandler(async(req,res,next)=>{
+        const validateData=BaseController.validateRequest(forgotPasswordValidation,req.body);
+        const result = await AuthService.forgotPassword(validateData)
+        BaseController.logAction('FORGOT_PASSWORD_OTP_SENT', result.user);
+        BaseController.sendSuccess(res,'OTP sent to email for password reset', result, 200)
+    })
+    static resetPassword =BaseController.asyncHandler(async(req,res,next)=>{
+        const validateData=BaseController.validateRequest(resetPasswordValidation,req.body);
+        const result = await AuthService.resetPassword (validateData)
+        BaseController.logAction('PASSWORD_RESET', result.user);
+        BaseController.sendSuccess(res,'Password reset successfully', result, 200)
     })
 
     static login = BaseController.asyncHandler(async (req, res, next) => {
