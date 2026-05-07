@@ -1,6 +1,7 @@
 const { verifyUserToken, verifyAdminToken } = require('../utils/jwt');
 const { sendError } = require('../utils/response');
 const User = require('../models/User');
+const Admin=require('../models/Admin')
 const logger = require('../utils/logger');
 
 
@@ -52,7 +53,7 @@ const authenticateAdmin = async (req, res, next) => {
     const decoded = verifyAdminToken(token);
     logger.info('Admin token verified successfully', { adminId: decoded.id });
 
-    const admin = await User.findById(decoded.id);
+    const admin = await Admin.findById(decoded.id);
     if (!admin || admin.role !== 'admin') {
       logger.warn('Admin auth: User not found or not admin', { 
         userId: decoded.id, 
@@ -62,9 +63,9 @@ const authenticateAdmin = async (req, res, next) => {
       return sendError(res, 'Admin not found', 403);
     }
 
-    if (admin.status === 'banned') {
-      logger.warn('Admin auth: Admin account is banned', { adminId: admin._id });
-      return sendError(res, 'Admin account has been banned', 403);
+    if (admin.status !== 'active') {
+      logger.warn('Admin auth: Admin account is inactive', { adminId: admin._id });
+      return sendError(res, 'Admin account has been inactive', 403);
     }
 
     req.admin = admin;
@@ -76,9 +77,10 @@ const authenticateAdmin = async (req, res, next) => {
 };
 
 const requireAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
+  if (!req.admin) {
     return sendError(res, 'Admin privileges required', 403);
   }
+
   next();
 };
 
