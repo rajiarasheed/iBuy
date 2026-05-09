@@ -61,11 +61,12 @@ class AuthService {
       await user.save();
 
       // Now generate token
-      const token = generateUserToken({
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      });
+      // const token = generateUserToken({
+      //   id: user._id,
+      //   email: user.email,
+      //   role: user.role,
+      // });
+      const token = generateUserToken(user);
 
       logger.info(`User verified: ${email}`);
 

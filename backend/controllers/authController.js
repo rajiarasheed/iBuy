@@ -97,6 +97,21 @@ class AuthController extends BaseController {
       200,
     );
   });
+
+  static updateProfile = BaseController.asyncHandler(async (req, res) => {
+  const user = req.user;
+
+  user.name = req.body.name || user.name;
+
+  await user.save();
+
+  BaseController.sendSuccess(
+    res,
+    "Profile updated successfully",
+    user,
+    200
+  );
+});
 }
 
 module.exports = AuthController;
