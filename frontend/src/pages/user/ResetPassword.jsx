@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback } from "react";
+import React, { memo, useState, useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -13,7 +13,14 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
+  const [timer, setTimer] = useState(30);
+  useEffect(() => {
+    if (timer <= 0) return;
+    const interval = setInterval(() => {
+      setTimer((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [timer]);
   const {
     register,
     handleSubmit,
@@ -23,9 +30,11 @@ const ResetPassword = () => {
 
   const password = watch("password");
   const handleResendOtp = async () => {
+    if (timer > 0) return;
     try {
       await resendOtp({ email });
       toast.success("New OTP sent!");
+      setTimer(30);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to resend OTP");
     }
@@ -133,7 +142,11 @@ const ResetPassword = () => {
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
                 className="absolute right-3 top-2.5 cursor-pointer text-gray-500"
               >
-                {showConfirmPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                {showConfirmPassword ? (
+                  <FiEyeOff size={18} />
+                ) : (
+                  <FiEye size={18} />
+                )}
               </span>
               {errors.confirmPassword && (
                 <p className="text-red-500 text-sm">
@@ -144,10 +157,14 @@ const ResetPassword = () => {
 
             <div className="text-right">
               <span
-                className="text-sm text-[#F83758] cursor-pointer hover:underline"
+                className={`text-sm ${
+                  timer > 0
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-[#F83758] cursor-pointer hover:underline"
+                }`}
                 onClick={handleResendOtp}
               >
-                Resend otp
+                {timer > 0 ? `Resend OTP in ${timer}s` : "Resend OTP"}
               </span>
             </div>
 
