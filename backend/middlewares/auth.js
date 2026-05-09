@@ -15,7 +15,11 @@ const authenticateUser = async (req, res, next) => {
     const token = authHeader.substring(7);
 
     const decoded = verifyUserToken(token);
+    console.log("DECODED TOKEN:", decoded);
 
+    if (!decoded?.id) {
+  return sendError(res, "Invalid token payload (missing user id)", 401);
+}
     const user = await User.findById(decoded.id);
     if (!user) {
       return sendError(res, 'User not found', 401);

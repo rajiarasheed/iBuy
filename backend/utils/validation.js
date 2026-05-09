@@ -165,7 +165,7 @@ const addressValidation = Joi.object({
     ...customMessages
   }),
 
-  email: commonPatterns.email.messages(customMessages),
+  // email: commonPatterns.email.messages(customMessages),
 
   streetAddress1: Joi.string().min(3).max(200).trim().required().messages({
     ...customMessages

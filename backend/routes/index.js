@@ -3,6 +3,7 @@ const config = require('../config/config');
 const { createAuthLimiter } = require('../middlewares/setup');
 
 const authRoutes = require('./auth');
+const addressRoutes = require('./address')
 
 const setupRoutes = (app) => {
 
@@ -31,7 +32,7 @@ const setupRoutes = (app) => {
 
 
     // TODO ROUTES
-    // app.use('/api/todos', todoRoutes);
+    app.use('/api/address', addressRoutes);
 };
 
 module.exports = {

@@ -6,7 +6,8 @@ const generateUserToken = (user) => {
   try {
     return jwt.sign(
       {
-        id: user._id,
+        // id: user._id,
+        id: user._id.toString(),
         email: user.email,
         role: user.role,
       },
