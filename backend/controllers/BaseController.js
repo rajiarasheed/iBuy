@@ -16,7 +16,7 @@ static asyncHandler(fn) {
         try {
             Promise.resolve(fn(req, res, next)).catch(next);
         } catch (err) {
-            next(err);  // ← catches synchronous throws like validateRequest
+            next(err);  
         }
     };
 }

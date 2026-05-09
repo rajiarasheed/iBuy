@@ -3,8 +3,6 @@ const config = require('../config/config');
 const { createAuthLimiter } = require('../middlewares/setup');
 
 const authRoutes = require('./auth');
-const adminRoutes = require('./admin');
-// const todoRoutes = require('./todos');
 
 const setupRoutes = (app) => {
 
@@ -30,13 +28,6 @@ const setupRoutes = (app) => {
             authRoutes
         );
     }
-
-
-    // ADMIN ROUTES
-    app.use(
-        '/api/admin',
-        adminRoutes
-    );
 
 
     // TODO ROUTES

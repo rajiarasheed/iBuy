@@ -1,15 +1,14 @@
 const User = require('../models/User');
-const Admin = require('../models/Admin')
 const config = require('../config/config');
 const logger = require('../utils/logger');
 
 const seedAdmin = async () => {
   try {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@admin.com';
-    const existingAdmin = await Admin.findByEmail(adminEmail);
+    const existingAdmin = await User.findByEmail(adminEmail);
 
     if (!existingAdmin) {
-      const admin = new Admin({
+      const admin = new User({
         name: 'Admin',
         email: adminEmail,
         password: process.env.ADMIN_PASSWORD || 'admin123',

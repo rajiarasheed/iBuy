@@ -1,7 +1,6 @@
-const { verifyUserToken, verifyAdminToken } = require('../utils/jwt');
+const { verifyUserToken } = require('../utils/jwt');
 const { sendError } = require('../utils/response');
 const User = require('../models/User');
-const Admin=require('../models/Admin')
 const logger = require('../utils/logger');
 
 
@@ -38,43 +37,69 @@ const authenticateAdmin = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      logger.warn('Admin auth: Missing or invalid authorization header', { authHeader });
-      return sendError(res, 'Access token required', 401);
+    if (!authHeader?.startsWith("Bearer ")) {
+      return sendError(res, "Access token required", 401);
     }
 
-    const token = authHeader.substring(7); 
-    
-    if (!token) {
-      logger.warn('Admin auth: Empty token after Bearer prefix');
-      return sendError(res, 'Access token required', 401);
+    const token = authHeader.split(" ")[1];
+    const decoded = verifyUserToken(token);
+
+    const user = await User.findById(decoded.id);
+
+    if (!user) return sendError(res, "User not found", 401);
+
+    if (user.role !== "admin") {
+      return sendError(res, "Admin access required", 403);
     }
 
-    const decoded = verifyAdminToken(token);
-    logger.info('Admin token verified successfully', { adminId: decoded.id });
-
-    const admin = await Admin.findById(decoded.id);
-    if (!admin || admin.role !== 'admin') {
-      logger.warn('Admin auth: User not found or not admin', { 
-        userId: decoded.id, 
-        userExists: !!admin, 
-        userRole: admin?.role 
-      });
-      return sendError(res, 'Admin not found', 403);
-    }
-
-    if (admin.status !== 'active') {
-      logger.warn('Admin auth: Admin account is inactive', { adminId: admin._id });
-      return sendError(res, 'Admin account has been inactive', 403);
-    }
-
-    req.admin = admin;
+    req.user = user;
     next();
-  } catch (error) {
-    logger.error('Admin authentication error:', error);
-    return sendError(res, 'Invalid or expired admin token', 401);
+  } catch (err) {
+    return sendError(res, "Invalid token", 401);
   }
 };
+
+// const authenticateAdmin = async (req, res, next) => {
+//   try {
+//     const authHeader = req.headers.authorization;
+
+//     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+//       logger.warn('Admin auth: Missing or invalid authorization header', { authHeader });
+//       return sendError(res, 'Access token required', 401);
+//     }
+
+//     const token = authHeader.substring(7); 
+    
+//     if (!token) {
+//       logger.warn('Admin auth: Empty token after Bearer prefix');
+//       return sendError(res, 'Access token required', 401);
+//     }
+
+//     const decoded = verifyAdminToken(token);
+//     logger.info('Admin token verified successfully', { adminId: decoded.id });
+
+//     const admin = await Admin.findById(decoded.id);
+//     if (!admin || admin.role !== 'admin') {
+//       logger.warn('Admin auth: User not found or not admin', { 
+//         userId: decoded.id, 
+//         userExists: !!admin, 
+//         userRole: admin?.role 
+//       });
+//       return sendError(res, 'Admin not found', 403);
+//     }
+
+//     if (admin.status !== 'active') {
+//       logger.warn('Admin auth: Admin account is inactive', { adminId: admin._id });
+//       return sendError(res, 'Admin account has been inactive', 403);
+//     }
+
+//     req.admin = admin;
+//     next();
+//   } catch (error) {
+//     logger.error('Admin authentication error:', error);
+//     return sendError(res, 'Invalid or expired admin token', 401);
+//   }
+// };
 
 const requireAdmin = (req, res, next) => {
   if (!req.admin) {

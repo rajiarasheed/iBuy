@@ -84,7 +84,6 @@ class AuthService {
     try {
       const user = await User.findByEmail(email);
       if (!user) throw new AuthenticationError("User not found.");
-      // if (user.isVerified) throw new ConflictError("User alreadyverified.");
 
       const otp = generateOtp();
       user.otp = otp;
@@ -185,6 +184,11 @@ class AuthService {
       if (!isPasswordValid) {
         throw new AuthenticationError("Invalid email or password...");
       }
+
+      // check admin or not
+//       if (user.role !== "admin") {
+//   throw new AuthenticationError("Not an admin");
+// }
 
       user.lastLogin = new Date();
       await user.save();

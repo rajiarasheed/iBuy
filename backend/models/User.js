@@ -65,24 +65,14 @@ const userSchema = new mongoose.Schema(
 );
 
 // Runs before saving user to database
-// userSchema.pre('save', async function(next){
-//     if(!this.isModified('password'))return next()
-//         try {
-//             const hashedPassword = await bcrypt.hash(this.password,12)
-//             this.password=hashedPassword
-//             next();
-//         } catch (error) {
-//             next(error)
-//         }
-// });
 
-userSchema.pre('save', async function() {  // ← no next parameter
+userSchema.pre('save', async function() {  
     if (!this.isModified('password')) return;
     
     try {
         this.password = await bcrypt.hash(this.password, 12);
     } catch (error) {
-        throw error;  // ← throw instead of next(error)
+        throw error;  
     }
 });
 

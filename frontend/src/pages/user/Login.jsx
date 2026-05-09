@@ -18,24 +18,48 @@ const Login = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const onSubmit = useCallback(
-    async (data) => {
-      setLoading(true);
-      try {
-        const res = await loginUser(data);
-        // save user + token
-        login(res.data.data);
-        toast.success("Welcome back!");
-        navigate("/");
-      } catch (error) {
-        console.log(error);
-        toast.error(error?.response?.data?.message || "Login Failed");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [login, navigate],
-  );
+  const onSubmit = async (data) => {
+  setLoading(true);
+
+  try {
+    const response = await loginUser(data);
+
+const userData = response.data.data;
+
+// save user in context/localStorage
+login(userData);
+
+// role based redirect
+if (userData.user.role === "admin") {
+  navigate("/admin/dashboard");
+} else {
+  navigate("/");
+}
+
+  } catch (error) {
+    toast.error(error?.response?.data?.message || "Login Failed");
+  } finally {
+    setLoading(false);
+  }
+};
+  // const onSubmit = useCallback(
+  //   async (data) => {
+  //     setLoading(true);
+  //     try {
+  //       const res = await loginUser(data);
+  //       // save user + token
+  //       login(res.data.data);
+  //       toast.success("Welcome back!");
+  //       navigate("/");
+  //     } catch (error) {
+  //       console.log(error);
+  //       toast.error(error?.response?.data?.message || "Login Failed");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   },
+  //   [login, navigate],
+  // );
   return (
     <div className="min-h-screen flex">
       {/* LEFT SIDE BRAND*/}
