@@ -1,4 +1,5 @@
 
 module.exports = {
-    AuthService: require('./AuthService')
+    AuthService: require('./AuthService'),
+    AddressService:require('./AddressService')
 };
