@@ -155,6 +155,47 @@ const updateTodoValidation = Joi.object({
   completed: Joi.boolean().optional()
 });
 
+// address validation here...
+const addressValidation = Joi.object({
+  firstName: Joi.string().min(2).max(50).trim().required().messages({
+    ...customMessages
+  }),
+
+  lastName: Joi.string().min(2).max(50).trim().required().messages({
+    ...customMessages
+  }),
+
+  email: commonPatterns.email.messages(customMessages),
+
+  streetAddress1: Joi.string().min(3).max(200).trim().required().messages({
+    ...customMessages
+  }),
+
+  streetAddress2: Joi.string().allow('').optional(),
+
+  streetAddress3: Joi.string().allow('').optional(),
+
+  country: Joi.string().min(2).max(100).default("India").messages(customMessages),
+
+  state: Joi.string().min(2).max(100).required().messages(customMessages),
+
+  city: Joi.string().min(2).max(100).required().messages(customMessages),
+
+  postalCode: Joi.string().min(3).max(20).required().messages(customMessages),
+
+  phone: Joi.string()
+    .pattern(/^\+?[\d\s\-\(\)]+$/)
+    .required()
+    .messages({
+      'string.pattern.base': 'Please provide a valid phone number',
+      'any.required': 'Phone number is required'
+    }),
+
+  isDefault: Joi.boolean().optional()
+});
+
+
+
 module.exports = {
   registerValidation,
   verifyOtpValidation,
@@ -163,6 +204,7 @@ module.exports = {
   forgotPasswordValidation,
   loginValidation,
   adminLoginValidation,
+  addressValidation,
   profileUpdateValidation,
   passwordChangeValidation,
   statusUpdateValidation,
