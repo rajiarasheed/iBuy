@@ -10,6 +10,8 @@ import "react-toastify/dist/ReactToastify.css";
 import ForgotPassword from "./pages/user/ForgotPassword";
 import ResetPassword from "./pages/user/ResetPassword";
 import Dashboard from "./pages/admin/Dashboard";
+import Profile from "./pages/user/Profile";
+import EditProfile from "./pages/user/EditProfile";
 
 const App = () => {
   return (
@@ -17,12 +19,14 @@ const App = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<PublicRoute><Login/></PublicRoute>}></Route>
-          <Route path="/register" element={<Register/>}></Route>
-          <Route path="/verify-otp" element={<VerifyOTP/>}></Route>
-          <Route path="/forgot-password" element={<ForgotPassword />}></Route>
-          <Route path="/reset-password" element={<ResetPassword />}></Route>
+          <Route path="/register" element={<PublicRoute><Register/></PublicRoute>}></Route>
+          <Route path="/verify-otp" element={<PublicRoute><VerifyOTP/></PublicRoute>}></Route>
+          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>}></Route>
+          <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>}></Route>
           {/* USER HOME */}
           <Route path='/' element={<ProtectedRoute><Home /></ProtectedRoute>}></Route>
+          <Route path="/profile" element={ <ProtectedRoute><Profile /></ProtectedRoute>}/>
+          <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>}/>
           {/* ADMIN DASHBOARD */}
           <Route path="/admin/dashboard" element={<AdminRoute><Dashboard/></AdminRoute>}></Route>
         </Routes>
