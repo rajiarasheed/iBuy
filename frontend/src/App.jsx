@@ -12,6 +12,7 @@ import ResetPassword from "./pages/user/ResetPassword";
 import Dashboard from "./pages/admin/Dashboard";
 import Profile from "./pages/user/Profile";
 import EditProfile from "./pages/user/EditProfile";
+import AppLayout from "./components/AppLayout";
 
 const App = () => {
   return (
@@ -24,7 +25,7 @@ const App = () => {
           <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>}></Route>
           <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>}></Route>
           {/* USER HOME */}
-          <Route path='/' element={<ProtectedRoute><Home /></ProtectedRoute>}></Route>
+          <Route path='/' element={<ProtectedRoute><AppLayout><Home /></AppLayout></ProtectedRoute>}></Route>
           <Route path="/profile" element={ <ProtectedRoute><Profile /></ProtectedRoute>}/>
           <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>}/>
           {/* ADMIN DASHBOARD */}
