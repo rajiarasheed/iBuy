@@ -21,13 +21,13 @@ const Navbar = () => {
           {/* TOP NAVBAR */}
           <div className="flex items-center justify-between h-16">
             {/* LOGO */}
-            <Link to="/" className="text-3xl font-bold text-primary">
+            <Link to="/" className="text-3xl font-bold text-primary flex-shrink-0">
               <img src={logo} alt="iBuy Logo" className="h-12 sm:h-14 w-auto" />
             </Link>
 
             {/* SEARCH BAR - DESKTOP */}
 
-            <div className="flex flex-1 max-w-md mx-8">
+            <div className="hidden md:flex flex-1 max-w-md mx-8">
               <div className="relative w-full">
                 <input
                   type="text"
@@ -40,6 +40,20 @@ const Navbar = () => {
                 </div>
               </div>
             </div>
+            
+
+          {/* MOBILE SEARCH */}
+          <div className="md:hidden flex-1 max-w-[120px]">
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="placeholder:text-xs py-2 pl-11 pr-4 focus:outline-none"
+              />
+
+              <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+            </div>
+          </div>
 
             {/* DESKTOP MENU */}
             <div className="hidden md:flex items-center gap-6 text-sm">
@@ -153,19 +167,19 @@ const Navbar = () => {
               )}
             </button>
           </div>
+          {/* MOBILE CATEGORY TABS */}
+          <div className=" flex items-center justify-evenly gap-5 overflow-x-auto whitespace-nowrap text-sm py-2 scrollbar-hide">
+            <Link className="text-gray-700 hover:text-primary">Fashion</Link>
 
-          {/* MOBILE SEARCH */}
-          {/* <div className="md:hidden pb-3">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full border border-gray-300 rounded-full py-2 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-primary"
-              />
+            <Link className="text-gray-700 hover:text-primary">Men</Link>
 
-              <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-            </div>
-          </div> */}
+            <Link className="text-gray-700 hover:text-primary">Women</Link>
+
+            <Link className="text-red-500 font-medium">Offers</Link>
+
+            <Link className="text-gray-700 hover:text-primary">Brands</Link>
+          </div>
+          
 
           {/* MOBILE MENU */}
           {mobileMenu && (
