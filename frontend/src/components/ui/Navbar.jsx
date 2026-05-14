@@ -1,5 +1,5 @@
 import React, { memo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../../assets/ibuy-logo.svg"; // logo
 
 import { FaOpencart, FaRegUser, FaHeart, FaSearch } from "react-icons/fa";
@@ -9,10 +9,19 @@ import { IoClose } from "react-icons/io5";
 import { FaShop } from "react-icons/fa6";
 import { BiCategoryAlt } from "react-icons/bi";
 import { IoLogOutOutline } from "react-icons/io5";
+import { useAuth } from "../../context/authContext";
 
 const Navbar = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const {  logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div>
@@ -132,8 +141,8 @@ const Navbar = () => {
                         />
                         Settings
                       </Link>
-                      <Link
-                        to="/profile"
+                      <button
+                        onClick={handleLogout}
                         className="text-sm group text-gray-500  hover:bg-primary hover:text-white px-4 py-3 flex gap-3 items-center transition"
                       >
                         <FaOpencart
@@ -141,7 +150,7 @@ const Navbar = () => {
                           className=" group-hover:text-white transition"
                         />
                         Logout
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -235,8 +244,8 @@ const Navbar = () => {
                 />
                 My Cart
               </Link>
-              <Link
-                to="/logout"
+              <button
+                onClick={handleLogout}
                 className="text-sm group text-red-700  hover:text-primary flex gap-3 items-center transition"
               >
                 <IoLogOutOutline
@@ -244,7 +253,7 @@ const Navbar = () => {
                   className=" group-hover:text-primary transition"
                 />
                 Logout
-              </Link>
+              </button>
 
               {/* <Link
                 to="/profile"
